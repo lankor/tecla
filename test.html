@@ -21,7 +21,9 @@ function drawBulet(e) {
     return key.code == e.keyCode
   });
 
-  item.shoot();
+  if (item) {
+    item.shoot();
+  }
 }
 
 function startGame() {
@@ -88,6 +90,8 @@ var Bullet = function(x, y) {
 }
 var EnemyFactory = function() {
   this.levelOneEnemies = [];
+  this.levelTwoEnemies = [];
+  this.levelThreeEnemies = [];
 
   this.start = function() {
     myGameArea.enemies = [];
@@ -105,14 +109,60 @@ var EnemyFactory = function() {
     this.levelOneEnemies.push(new Enemy("I", x+=delta_x, y));
     this.levelOneEnemies.push(new Enemy("O", x+=delta_x, y));
     this.levelOneEnemies.push(new Enemy("P", x+=delta_x, y));
+
+    this.levelTwoEnemies.push(new Enemy("A", x-=435, y));
+    this.levelTwoEnemies.push(new Enemy("S", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("D", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("F", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("G", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("H", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("J", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("K", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("L", x+=delta_x, y));
+    this.levelTwoEnemies.push(new Enemy("Ñ", x+=delta_x, y));
+
+    this.levelThreeEnemies.push(new Enemy("Z", x-=435, y));
+    this.levelThreeEnemies.push(new Enemy("X", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy("C", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy("V", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy("B", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy("N", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy("M", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy(",", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy(".", x+=delta_x, y));
+    this.levelThreeEnemies.push(new Enemy("-", x+=delta_x, y));
   }
 
-  this.createEnemy = function() {
-    var random = Math.floor(Math.random() * this.levelOneEnemies.length);
-    var blueprint = this.levelOneEnemies[random];
-    var enemy = new Enemy(blueprint.name, blueprint.x, blueprint.y);
-    myGameArea.enemies.push(enemy);
-    enemy.draw();
+  this.createEnemy = function(level) {
+    var random, blueprint, intCase;
+    intCase = parseInt(level)
+    switch (intCase) {
+      case 1:
+        random = Math.floor(Math.random() * this.levelOneEnemies.length);
+        blueprint = this.levelOneEnemies[random];
+
+        break;
+      case 2:
+        random = Math.floor(Math.random() * this.levelTwoEnemies.length);
+        blueprint = this.levelTwoEnemies[random];
+        break;
+      case 3:
+        random = Math.floor(Math.random() * this.levelThreeEnemies.length);
+        blueprint = this.levelThreeEnemies[random];
+        break;
+      case 4:
+        random = Math.floor(Math.random() * 3) + 1;
+        this.createEnemy(random);
+        break;
+      default:
+
+    }
+
+    if (intCase != 4) {
+      var enemy = new Enemy(blueprint.name, blueprint.x, blueprint.y);
+      myGameArea.enemies.push(enemy);
+      enemy.draw();
+    }
   }
 
 }
@@ -164,9 +214,6 @@ var keyboard = {
     this.levelQ();
     this.levelA();
     this.levelZ();
-
-
-
 
     this.draw();
   },
@@ -262,7 +309,7 @@ var myGameArea = {
   enemySpeed : 5,
     canvas : document.createElement("canvas"),
     createEnemies : function(enemyFactory) {
-      this.enemyFactory.createEnemy();
+      this.enemyFactory.createEnemy(this.level);
     },
     init : function() {
       this.bullets = [];
@@ -297,9 +344,15 @@ var myGameArea = {
           level = item;
         }
       })
-
       this.enemySpeed = parseInt(level.value);
 
+      levelList = document.getElementById("level").childNodes;
+      levelList.forEach(function(item) {
+        if (item.selected) {
+          level = item;
+        }
+      })
+      this.level = level.value;
       this.createEnemies();
       this.play();
 
@@ -395,15 +448,23 @@ function updateGameArea() {
       <button type="button" onclick="myGameArea.play()" >Play</button>
       <br />
       Mode:
-      <input type="radio" name="mode" value="40"></input>
-      <label>Expert</label>
+      <input type="radio" name="mode" value="5" checked></input>
+      <label>Begginer</label>
 
       <input type="radio" name="mode" value="25"></input>
       <label>Intermediate</label>
 
-      <input type="radio" name="mode" value="5" checked></input>
-      <label>Begginer</label>
-      https://www.w3schools.com/graphics/tryit.asp?filename=trygame_default_gravity
+      <input type="radio" name="mode" value="40"></input>
+      <label>Expert</label>
+
+      <br />
+      <label>Level</label>
+      <select id="level">
+        <option value="1">QWERT YUIOP</option>
+        <option value="2">ASDFG HJKLÑ</option>
+        <option value="3">ZXCVB NM,.-</option>
+        <option value="4" selected>All</option>
+      </select>
     </body>
     </td>
   </tr>
