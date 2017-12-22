@@ -31,7 +31,7 @@ function startGame() {
     myGamePiece.gravity = 0.05;
     myScore = new component("15px", "Consolas", "black", 580, 10, "text");
     */
-    myGameArea.start();
+    myGameArea.init();
 }
 
 var Key = function(name, x, y, code) {
@@ -264,26 +264,45 @@ var myGameArea = {
     createEnemies : function(enemyFactory) {
       this.enemyFactory.createEnemy();
     },
-    start : function() {
-      if (this.stopped) {
-        clearInterval(this.interval);
-      }
+    init : function() {
       this.bullets = [];
       this.enemies = [];
       this.fails = 0;
       this.score = 0;
-      this.stopped = false;
+      this.stopped = true;
       this.canvas.width = 780;
       this.canvas.height = 570;
       this.context = this.canvas.getContext("2d");
-      document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+      var element =  document.body.childNodes[3].childNodes[1].childNodes[0].childNodes[1];
+      element.appendChild(this.canvas);
       this.frameNo = 0;
       keyboard.initKeyboard();
       keyboard.draw();
-      this.enemyFactory.start()
-      this.createEnemies();
       this.updateLegends();
-      this.interval = setInterval(updateGameArea, 150);
+      this.enemyFactory.start();
+    },
+    start : function() {
+      if (!this.stopped) {
+        this.stop();
+      }
+      this.clear();
+      this.bullets = [];
+      this.enemies = [];
+      this.fails = 0;
+      this.score = 0;
+      var levelList = document.getElementsByName("mode");
+      var level;
+      levelList.forEach(function(item) {
+        if (item.checked) {
+          level = item;
+        }
+      })
+
+      this.enemySpeed = parseInt(level.value);
+
+      this.createEnemies();
+      this.play();
+
     },
     clear : function() {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -297,6 +316,17 @@ var myGameArea = {
     stop : function() {
       clearInterval(this.interval);
       this.stopped = true;
+    },
+    pause : function() {
+      if (!this.stopped) {
+        this.stop();
+      }
+    },
+    play : function() {
+      if (this.stopped) {
+        this.interval = setInterval(updateGameArea, 150);
+        this.stopped = false;
+      }
     }
 }
 
@@ -351,46 +381,31 @@ function updateGameArea() {
       myGameArea.enemies[i].update();
     }
   }
-
-  /*
-    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-    for (i = 0; i < myObstacles.length; i += 1) {
-        if (myGamePiece.crashWith(myObstacles[i])) {
-            return;
-        }
-    }
-    myGameArea.clear();
-    myGameArea.frameNo += 1;
-    if (myGameArea.frameNo == 1 || everyinterval(150)) {
-        x = myGameArea.canvas.width;
-        minHeight = 20;
-        maxHeight = 200;
-        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
-        minGap = 50;
-        maxGap = 200;
-        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
-        myObstacles.push(new component(10, height, "green", x, 0));
-        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
-    }
-    for (i = 0; i < myObstacles.length; i += 1) {
-        myObstacles[i].x += -1;
-        myObstacles[i].update();
-    }
-    myScore.text="SCORE: " + myGameArea.frameNo;
-    myScore.update();
-    myGamePiece.newPos();
-    myGamePiece.update();
-    */
     myGameArea.updateLegends();
 }
 
-function everyinterval(n) {
-    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
-    return false;
-}
 </script>
-<br />
-<button type="button" onclick="myGameArea.start()" >Start</button>
-https://www.w3schools.com/graphics/tryit.asp?filename=trygame_default_gravity
-</body>
+<table>
+  <tr>
+    <td>
+    </td>
+    <td>
+      <button type="button" onclick="myGameArea.start()" >Start</button>
+      <button type="button" onclick="myGameArea.pause()" >Pause</button>
+      <button type="button" onclick="myGameArea.play()" >Play</button>
+      <br />
+      Mode:
+      <input type="radio" name="mode" value="40"></input>
+      <label>Expert</label>
+
+      <input type="radio" name="mode" value="25"></input>
+      <label>Intermediate</label>
+
+      <input type="radio" name="mode" value="5" checked></input>
+      <label>Begginer</label>
+      https://www.w3schools.com/graphics/tryit.asp?filename=trygame_default_gravity
+    </body>
+    </td>
+  </tr>
+</table>
 </html>
