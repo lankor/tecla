@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+<body onload="startGame()">
+<script>
+var myGamePiece;
+
+
+var myScore;
+
+function drawBulet(e) {
+  var item = keyboard.keys.find(function (key) {
+    return key.code == e.keyCode
+  });
+
+  item.shoot();
+}
+
+function startGame() {
+  window.addEventListener('keypress',drawBulet,false);
+    /*
+    myGamePiece = new component(10, 10, "red", 10, 20);
+    myGamePiece.gravity = 0.05;
+    myScore = new component("15px", "Consolas", "black", 580, 10, "text");
+    */
+    myGameArea.start();
+}
+
+var Key = function(name, x, y, code) {
+  this.name = name;
+  this.x = x;
+  this.y = y;
+  this.code = code;
+
+
+  this.draw = function() {
+    ctx = myGameArea.context;
+
+    ctx.beginPath();
+    ctx.rect(this.x - 5, this.y - 15, 20, 20);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = 'rgba(225,225,225,0.5)';
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.font = "15px Consolas";
+    ctx.fillStyle = "black";
+    ctx.fillText(this.name, this.x, this.y);
+  }
+  this.shoot = function() {
+    if (!myGameArea.stopped) {
+      var bullet = new Bullet(this.x + 3, this.y - 20);
+      myGameArea.bullets.push(bullet);
+      bullet.draw();
+    }
+  }
+}
+
+var Bullet = function(x, y) {
+  this.x = x;
+  this.y = y;
+
+  this.draw = function() {
+      ctx = myGameArea.context;
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y, 5, 5);
+  }
+  this.update = function() {
+    ctx = myGameArea.context;
+    this.y -= myGameArea.bulletSpeed;
+    ctx.fillStyle = "red";
+    ctx.fillRect(this.x, this.y, 5, 5);
+  }
+
+  this.crashWith = function(enemy) {
+    return (this.y <= enemy.y && (this.x >= enemy.x && this.x <= enemy.x + 5))
+  }
+}
+var EnemyFactory = function() {
+  this.levelOneEnemies = [];
+
+  this.start = function() {
+    myGameArea.enemies = [];
+
+    var x = 150;
+    var y = 0;
+    var delta_x = 50;
+    this.levelOneEnemies.push(new Enemy("Q", x, y));
+    this.levelOneEnemies.push(new Enemy("W", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("E", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("R", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("T", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("Y", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("U", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("I", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("O", x+=delta_x, y));
+    this.levelOneEnemies.push(new Enemy("P", x+=delta_x, y));
+  }
+
+  this.createEnemy = function() {
+    var random = Math.floor(Math.random() * this.levelOneEnemies.length);
+    var blueprint = this.levelOneEnemies[random];
+    var enemy = new Enemy(blueprint.name, blueprint.x, blueprint.y);
+    myGameArea.enemies.push(enemy);
+    enemy.draw();
+  }
+
+}
+var Enemy = function (name, x, y) {
+  this.name = name;
+  this.x = x;
+  this.y = y;
+
+
+  this.draw = function() {
+    ctx = myGameArea.context;
+
+    ctx.beginPath();
+    ctx.rect(this.x - 5, this.y - 15, 20, 20);
+    //ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = 'rgba(22,145,4,0.5)';
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.font = "15px Consolas";
+    ctx.fillStyle = "black";
+    ctx.fillText(this.name, this.x, this.y);
+  }
+
+  this.update = function() {
+    ctx = myGameArea.context;
+    this.y += myGameArea.enemySpeed;
+
+    ctx.beginPath();
+    ctx.rect(this.x - 5, this.y - 15, 20, 20);
+    //ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = 'rgba(22,145,4,0.5)';
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.font = "15px Consolas";
+    ctx.fillStyle = "black";
+    ctx.fillText(this.name, this.x, this.y);
+  }
+}
+var keyboard = {
+  delta_x : 50,
+  initKeyboard : function() {
+    this.keys = [];
+    this.levelQ();
+    this.levelA();
+    this.levelZ();
+
+
+
+
+    this.draw();
+  },
+  levelQ : function() {
+    var x = 150;
+    var y = 500;
+
+    var qKey = new Key("Q", x, y, 113);
+    var wKey = new Key("W", x+=this.delta_x, y, 119);
+    var eKey = new Key("E", x+=this.delta_x, y, 101);
+    var rKey = new Key("R", x+=this.delta_x, y, 114);
+    var tKey = new Key("T", x+=this.delta_x, y, 116);
+    var yKey = new Key("Y", x+=this.delta_x, y, 121);
+    var uKey = new Key("U", x+=this.delta_x, y, 117);
+    var iKey = new Key("I", x+=this.delta_x, y, 105);
+    var oKey = new Key("O", x+=this.delta_x, y, 111);
+    var pKey = new Key("P", x+=this.delta_x, y, 112);
+
+    this.keys.push(qKey);
+    this.keys.push(wKey);
+    this.keys.push(eKey);
+    this.keys.push(rKey);
+    this.keys.push(tKey);
+    this.keys.push(yKey);
+    this.keys.push(uKey);
+    this.keys.push(iKey);
+    this.keys.push(oKey);
+    this.keys.push(pKey);
+  },
+  levelA : function() {
+    var x = 165;
+    var y = 530;
+    var aKey = new Key("A", x, y, 97);
+    var sKey = new Key("S", x+=this.delta_x, y, 115);
+    var dKey = new Key("D", x+=this.delta_x, y, 100);
+    var fKey = new Key("F", x+=this.delta_x, y, 102);
+    var gKey = new Key("G", x+=this.delta_x, y, 103);
+    var hKey = new Key("H", x+=this.delta_x, y, 104);
+    var jKey = new Key("J", x+=this.delta_x, y, 106);
+    var kKey = new Key("K", x+=this.delta_x, y, 107);
+    var lKey = new Key("L", x+=this.delta_x, y, 108);
+    var enieKey = new Key("Ñ", x+=this.delta_x, y, 241);
+
+    this.keys.push(aKey);
+    this.keys.push(sKey);
+    this.keys.push(dKey);
+    this.keys.push(fKey);
+    this.keys.push(gKey);
+    this.keys.push(hKey);
+    this.keys.push(jKey);
+    this.keys.push(kKey);
+    this.keys.push(lKey);
+    this.keys.push(enieKey);
+  },
+  levelZ : function () {
+    var x = 180;
+    var y = 560;
+    var zKey = new Key("Z", x, y, 122);
+    var xKey = new Key("X", x+=this.delta_x, y, 120);
+    var cKey = new Key("C", x+=this.delta_x, y, 99);
+    var vKey = new Key("V", x+=this.delta_x, y, 118);
+    var bKey = new Key("B", x+=this.delta_x, y, 98);
+    var nKey = new Key("N", x+=this.delta_x, y, 110);
+    var mKey = new Key("M", x+=this.delta_x, y, 109);
+    var coKey = new Key(",", x+=this.delta_x, y, 44);
+    var dotKey = new Key(".", x+=this.delta_x, y, 46);
+    var _Key = new Key("-", x+=this.delta_x, y, 45);
+
+    this.keys.push(zKey);
+    this.keys.push(xKey);
+    this.keys.push(cKey);
+    this.keys.push(vKey);
+    this.keys.push(bKey);
+    this.keys.push(nKey);
+    this.keys.push(mKey);
+    this.keys.push(coKey);
+    this.keys.push(dotKey);
+    this.keys.push(_Key);
+  },
+  draw : function() {
+    for (i = 0; i < this.keys.length; i++) {
+      this.keys[i].draw();
+    }
+  }
+}
+
+
+var myGameArea = {
+  score : 0,
+  stopped : false,
+  enemyFactory : new EnemyFactory(),
+  bulletSpeed : 20,
+  enemySpeed : 5,
+    canvas : document.createElement("canvas"),
+    createEnemies : function(enemyFactory) {
+      this.enemyFactory.createEnemy();
+    },
+    start : function() {
+      if (this.stopped) {
+        clearInterval(this.interval);
+      }
+      this.bullets = [];
+      this.enemies = [];
+      this.fails = 0;
+      this.score = 0;
+      this.stopped = false;
+      this.canvas.width = 780;
+      this.canvas.height = 570;
+      this.context = this.canvas.getContext("2d");
+      document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+      this.frameNo = 0;
+      keyboard.initKeyboard();
+      keyboard.draw();
+      this.enemyFactory.start()
+      this.createEnemies();
+      this.updateLegends();
+      this.interval = setInterval(updateGameArea, 150);
+    },
+    clear : function() {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    updateLegends : function () {
+      ctx.font = "15px Consolas";
+      ctx.fillStyle = "black";
+      ctx.fillText("SCORE: " + this.score, 10, 20);
+      ctx.fillText("ERRORS: " + this.fails, 10, 35);
+    },
+    stop : function() {
+      clearInterval(this.interval);
+      this.stopped = true;
+    }
+}
+
+function updateGameArea() {
+  myGameArea.clear();
+  keyboard.draw();
+  for (i = 0; i < myGameArea.bullets.length; i++) {
+    if (myGameArea.bullets[i].y <= 10) {//UPDATE
+      myGameArea.bullets.splice(i, 1);
+      myGameArea.fails++;
+
+      if (myGameArea.fails == 3) {
+        alert("Game Over bullets");
+        myGameArea.stop();
+      }
+    } else {
+      myGameArea.bullets[i].update();
+
+      for (j = 0; j < myGameArea.enemies.length; j++) {
+        if (myGameArea.bullets[i] && myGameArea.bullets[i].crashWith(myGameArea.enemies[j])) {
+          myGameArea.score += 1;
+
+          console.log(myGameArea.score);
+          if (myGameArea.score % 10 == 0) {
+            myGameArea.enemySpeed++;
+            console.log(myGameArea.enemySpeed);
+          }
+
+          if (myGameArea.score % 100 == 0) {
+            myGameArea.fails--;
+          }
+          myGameArea.bullets.splice(i, 1);
+          myGameArea.enemies.splice(j, 1);
+          myGameArea.createEnemies();
+        }
+      }
+    }
+  }
+
+  for (i = 0; i < myGameArea.enemies.length; i++) {
+    if (myGameArea.enemies[i].y >= 480) {
+      myGameArea.enemies.splice(i, 1);
+      myGameArea.fails++;
+
+      if (myGameArea.fails == 3) {
+        alert("Game Over enemies.");
+        myGameArea.stop();
+      } else {
+        myGameArea.createEnemies();
+      }
+    } else {
+      myGameArea.enemies[i].update();
+    }
+  }
+
+  /*
+    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+    for (i = 0; i < myObstacles.length; i += 1) {
+        if (myGamePiece.crashWith(myObstacles[i])) {
+            return;
+        }
+    }
+    myGameArea.clear();
+    myGameArea.frameNo += 1;
+    if (myGameArea.frameNo == 1 || everyinterval(150)) {
+        x = myGameArea.canvas.width;
+        minHeight = 20;
+        maxHeight = 200;
+        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
+        minGap = 50;
+        maxGap = 200;
+        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
+        myObstacles.push(new component(10, height, "green", x, 0));
+        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
+    }
+    for (i = 0; i < myObstacles.length; i += 1) {
+        myObstacles[i].x += -1;
+        myObstacles[i].update();
+    }
+    myScore.text="SCORE: " + myGameArea.frameNo;
+    myScore.update();
+    myGamePiece.newPos();
+    myGamePiece.update();
+    */
+    myGameArea.updateLegends();
+}
+
+function everyinterval(n) {
+    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+    return false;
+}
+</script>
+<br />
+<button type="button" onclick="myGameArea.start()" >Start</button>
+https://www.w3schools.com/graphics/tryit.asp?filename=trygame_default_gravity
+</body>
+</html>
